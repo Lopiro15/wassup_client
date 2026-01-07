@@ -68,9 +68,9 @@
               />
               <div class="member-info">
                 <span class="member-name">{{ member.User.nom }} {{ member.User.prenoms }}</span>
-                <span v-if="isAdmin(member.User)" class="admin-badge">Admin</span>
+                <span v-if="adminsUsersId.includes(member.User.id)" class="admin-badge">Admin</span>
               </div>
-              <div class="member-actions" v-if="!isAdmin(member.User)">
+              <div class="member-actions" v-if="!adminsUsersId.includes(member.User.id) && adminsUsersId.includes(user.user.id)">
                 <button
                   class="btn btn-danger btn-xs"
                   @click="grantMember(member)"
@@ -85,7 +85,7 @@
                   :disabled="isLoading.mute === member.id"
                   title="Muter ce membre"
                 >
-                  <i class="fas" :class="isMuted(member) ? 'fa-volume-high' : 'fa-volume-mute'"></i>
+                  <i class="fas" :class="mutedUsersId.includes(member.User.id) ? 'fa-volume-high' : 'fa-volume-mute'"></i>
                 </button>
                 <button
                   class="btn btn-danger btn-xs"
@@ -98,7 +98,7 @@
               </div>
             </div>
           </div>
-          <div class="mt-2 d-flex justify-content-center">
+          <div class="mt-2 d-flex justify-content-center" v-if="!isbanned">
             <button class="btn btn-danger" @click="leaveGroup">
             <span v-if="isLoading.leave">
                 <i class="fas fa-spinner fa-spin"></i>
@@ -133,6 +133,10 @@ const props = defineProps({
   allUsers: {
     type: Array,
     default: () => []
+  },
+  isbanned: {
+    type: Boolean,
+    default: false
   }
 });
 
@@ -174,15 +178,23 @@ const canEditName = computed(() => {
   return (myMb && myMb.role === "admin"); // À adapter selon vos règles
 });
 
-const isAdmin = (user) => {
-  const myMb = groupMembers.value.find(m => m.User.id === user.id)
-  return (myMb && myMb.role === "admin");
-}
+const adminsUsersId = computed(() => {
+  return groupMembers.value.filter(m => m.role === "admin").map((m) => m.User.id);
+})
 
-const isMuted = (u) => {
-  const myMb = groupMembers.value.find(m => m.User.id === u.User.id)
-  return (myMb && myMb.statut === "KICKED")
-}
+const mutedUsersId = computed(() => {
+  return groupMembers.value.filter(m => m.statut === "KICKED").map((m) => m.User.id);
+})
+
+// const isAdmin = (user) => {
+//   const myMb = groupMembers.value.find(m => m.User.id === user.id)
+//   return (myMb && myMb.role === "admin");
+// }
+
+// const isMuted = (u) => {
+//   const myMb = groupMembers.value.find(m => m.User.id === u.User.id)
+//   return (myMb && myMb.statut === "KICKED")
+// }
 
 const canSaveName = computed(() => {
   return newGroupName.value.trim() &&

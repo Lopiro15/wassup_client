@@ -28,10 +28,8 @@
             :class="{ selected: selectedUser?.id === user.id }"
             @click="selectUser(user)"
           >
-            <ChatAvatar
-              :name="user.nom + ' ' + user.prenoms"
-              size="sm"
-            />
+            <div class="contact-avatar">{{ getInitialAllNames(user.nom + " " + user.prenoms) }}</div>
+
             <div class="contact-info">
               <h4>{{ user.nom + " " + user.prenoms }}</h4>
               <p>{{ user.username }}</p>
@@ -59,7 +57,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import ChatAvatar from './ChatAvatar.vue';
+import {getInitialAllNames} from "@/utils/services.js";
 
 const props = defineProps({
   isVisible: {
@@ -109,61 +107,5 @@ const close = () => {
 </script>
 
 <style scoped>
-.contacts-list {
-  margin-top: 15px;
-  max-height: 300px;
-  overflow-y: auto;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-}
-
-.contact-item {
-  display: flex;
-  align-items: center;
-  padding: 12px 15px;
-  border-bottom: 1px solid #f0f0f0;
-  cursor: pointer;
-  transition: background 0.2s;
-  gap: 12px;
-}
-
-.contact-item:last-child {
-  border-bottom: none;
-}
-
-.contact-item:hover {
-  background: #f8f9fa;
-}
-
-.contact-item.selected {
-  background: #e6f0ff;
-  border-left: 3px solid #764ba2;
-}
-
-.contact-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.contact-info h4 {
-  margin: 0;
-  font-size: 14px;
-  color: #333;
-  font-weight: 500;
-}
-
-.contact-info p {
-  margin: 2px 0 0 0;
-  font-size: 12px;
-  color: #777;
-}
-
-.fa-spin {
-  animation: fa-spin 1s infinite linear;
-}
-
-@keyframes fa-spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
+@import './../views/Home/Home.style.css';
 </style>

@@ -43,3 +43,20 @@ export function getInitialAllNames(name) {
   }
   return name.substring(0, 2).toUpperCase();
 }
+
+export function getConvName(conv, user) {
+  if (conv) {
+    if (conv.name) {
+      return conv.name
+    } else {
+      const mcv = getOtherMembreInPrivate(conv, user)
+      return mcv.User.nom + " " + mcv.User.prenoms;
+    }
+  }
+  return "";
+}
+
+export function getOtherMembreInPrivate(conv, user) {
+  const membres = conv.MembreConversations;
+  return membres.find(mc => mc.User.id !== user.id);
+}

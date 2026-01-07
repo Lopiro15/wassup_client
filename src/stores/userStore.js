@@ -47,6 +47,7 @@ export const useUserStore = defineStore('user', () => {
       }
 
     } catch (e) {
+      console.log(e)
       isLoadingLogin.value = false;
       if (e.response?.status === 401) {
         errorLogin.value = "Identifiants invalides"

@@ -57,10 +57,8 @@
             :class="{ selected: isUserSelected(user) }"
             @click="toggleUser(user)"
           >
-            <ChatAvatar
-              :name="user.nom + ' ' + user.prenoms"
-              size="sm"
-            />
+            <div class="contact-avatar">{{ getInitialAllNames(user.nom + " " + user.prenoms) }}</div>
+
             <div class="contact-info">
               <h4>{{ user.nom + " " + user.prenoms }}</h4>
               <p>{{ user.username }}</p>
@@ -93,7 +91,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import ChatAvatar from './ChatAvatar.vue';
+import {getInitialAllNames} from "@/utils/services.js";
 
 const props = defineProps({
   isVisible: {
@@ -167,67 +165,5 @@ const close = () => {
 </script>
 
 <style scoped>
-.selected-contacts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 10px 0;
-  min-height: 40px;
-  padding: 10px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  background: #f8f9fa;
-}
-
-.selected-contact {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: white;
-  padding: 6px 10px;
-  border-radius: 16px;
-  border: 1px solid #e0e0e0;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.remove-contact {
-  background: none;
-  border: none;
-  color: #999;
-  cursor: pointer;
-  padding: 0;
-  width: 16px;
-  height: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s;
-  font-size: 14px;
-}
-
-.remove-contact:hover:not(:disabled) {
-  background: #ff4444;
-  color: white;
-}
-
-.contact-checkbox {
-  width: 20px;
-  height: 20px;
-  border: 2px solid #ddd;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 12px;
-  flex-shrink: 0;
-  transition: all 0.2s;
-}
-
-.contact-item.selected .contact-checkbox {
-  background: #764ba2;
-  border-color: #764ba2;
-}
+@import './../views/Home/Home.style.css';
 </style>

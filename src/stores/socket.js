@@ -2,7 +2,6 @@
 import {defineStore} from 'pinia'
 import {ref} from 'vue'
 import {io} from 'socket.io-client'
-import * as factory from "@/utils/messageFactory.js";
 import {ACTIONS} from "@/utils/messageTypes.js";
 import {DiffieHellman} from "@/utils/cryptoService.js";
 import debugLib from "debug";
@@ -37,7 +36,9 @@ export const useSocketStore = defineStore('socket', () => {
       })
 
       const startEncryptionHandshake = (socket) => {
-        socket.value.emit('ecdh', factory.createClientHello());
+        socket.value.emit('ecdh', {
+          action: ACTIONS.CLIENT_HELLO
+        });
         const timeoutId = setTimeout(() => {
           socket.value.removeListener('ecdh', dataHandler);
           reject({status: false, error: "Erreur d'encryption session"})
@@ -60,7 +61,10 @@ export const useSocketStore = defineStore('socket', () => {
 
               // Envoi de notre clé publique au serveur
               const clientPubKeyHex = await dhClient.value.getPublicKey();
-              socket.value.emit('ecdh', factory.createClientPublicKey(clientPubKeyHex));
+              socket.value.emit('ecdh', {
+                publicKey: clientPubKeyHex,
+                action: ACTIONS.CLIENT_PUBLIC_KEY
+              });
             } else if (received.type === ACTIONS.SERVER_RECEIVED_KEY) {
               socket.value.removeListener('ecdh', dataHandler);
               console.log('🔐 Canal sécurisé établi');
@@ -159,36 +163,25 @@ export const useSocketStore = defineStore('socket', () => {
 
   async function processDecryptedMessage(msg) {
     const messageHandlers = {
-      [ACTIONS.SERVER_HELLO]: () => console.log(`📩 ${msg.sender}: ${msg.msg}`),
       [ACTIONS.SERVER_FORWARD]: async () => {
         await receiveMessage(msg)
       },
       [ACTIONS.SERVER_GROUP_BROADCAST]: async () => {
         await receiveMessage(msg)
       },
-      [ACTIONS.SERVER_ERROR]: () => console.log(`📩 ${msg.sender}: ${msg.msg}`),
       [ACTIONS.SERVER_NOTIFY_ME]: () => {
         if (msg.users) {
           usersConnected.value = msg.users
         }
       },
-      [ACTIONS.SERVER_LIST_RESPONSE]: () => console.log('👥 Clients connectés :', msg.clients.join(', ')),
-      [ACTIONS.SERVER_GROUP_LIST_RESPONSE]: () => console.log('Liste des groupes :', msg.groups.join(', ')),
-      [ACTIONS.SERVER_GROUP_LIST_MEMBER_RESPONSE]: () => console.log('👥 Liste des membres du groupe :', msg.members.join(', ')),
-      [ACTIONS.SERVER_GROUP_LIST_MESSAGES_RESPONSE]: () => console.log('📩 Liste des messages du groupe :', msg.messages.join('\n')),
-      [ACTIONS.SERVER_GROUP_LIST_EVENTS_RESPONSE]: () => console.log('👥 Liste des events du groupe :', msg.events.join('\n')),
       [ACTIONS.SERVER_NOTIFY]: () => {
         toast.success(`${msg.msg}`)
         if (msg.users) {
           usersConnected.value = msg.users
         }
       },
-      [ACTIONS.SERVER_NOTIFY_GROUP]: () => console.log(`🔔 ${msg.msg}`),
       [ACTIONS.SERVER_NOTIFY_GROUP_ACTION]: async () => {
         await chat.fetchConversations();
-      },
-      [ACTIONS.SERVER_QUIT_ACK]: () => {
-        console.log('👋 Déconnexion réussie.');
       }
     };
 
@@ -205,31 +198,6 @@ export const useSocketStore = defineStore('socket', () => {
     // Décrypter le message avant de l'ajouter
     const messageData = JSON.parse(msg.msgObject);
     await chat.fetchConversations();
-    // Trouver la conversation correspondante pour récupérer la clé
-    // const targetConv = chat.conversations.find(c => c.id === msg.conv);
-    //
-    // if (targetConv && targetConv.activekey && targetConv.activekey.keys) {
-    //   try {
-    //     // Décrypter le contenu
-    //     // Ajouter le contenu décrypté au message
-    //     messageData.contenu = await chat.decryptMessage(
-    //       messageData.contenu,
-    //       targetConv.activekey.keys
-    //     );
-    //   } catch (error) {
-    //     console.error('Erreur décryptage:', error);
-    //   }
-    // }
-    //
-    // chat.conversations = chat.conversations.map(cov => {
-    //   if (cov.id === msg.conv) {
-    //     return {
-    //       ...cov,
-    //       unread: (chat.activeConv && chat.activeConv.id === cov.id) ? cov.unread - 1 : cov.unread
-    //     }
-    //   }
-    //   return cov
-    // })
 
     // activeConv.value
     if (chat.activeConv && chat.activeConv.id === msg.conv) {

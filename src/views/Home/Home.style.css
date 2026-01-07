@@ -344,12 +344,12 @@
 /* Responsive */
 @media (max-width: 768px) {
   .conversations-sidebar {
-    width: 100%;
+    width: 50%;
   }
 
-  .chat-area {
-    display: none;
-  }
+  /*.chat-area {*/
+  /*  display: none;*/
+  /*}*/
 
   .chat-area.active {
     display: flex;

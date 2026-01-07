@@ -249,7 +249,7 @@ export const useChatStore = defineStore('chat', () => {
         headers: { 'Authorization': `Bearer ${user.token}` }
       });
       await fetchConversations();
-      await notifygroup(response.data)
+      await notifygroup(response.data, ACTIONS.GROUP_BAN, member.username)
     } catch (e) {
       console.log(e)
     }
@@ -298,11 +298,13 @@ export const useChatStore = defineStore('chat', () => {
     }
   }
 
-  async function notifygroup(conv) {
+  async function notifygroup(conv, action= undefined, dest= undefined) {
     await socket.sendEncrypted({
       sender: user.user.username,
       conv: conv.id,
-      action: ACTIONS.GROUP_ACTION
+      action: ACTIONS.GROUP_ACTION,
+      typeaction: action,
+      dest
     })
   }
 
